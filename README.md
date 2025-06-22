@@ -1,30 +1,67 @@
-# Desktop Web Application
+# Image to Hex - Analisador de Cores
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+Aplicação web para análise de cores de imagens e aplicação de filtros, desenvolvida em Next.js + React.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/kaues-projects-dbdba449/v0-desktop-web-application)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/btgO7uCPZGk)
+## Funcionalidades
 
-## Overview
+- Upload de imagens (JPG, PNG)
+- Análise das principais cores presentes na imagem
+- Aplicação de filtros personalizados
+- Visualização das cores extraídas em formato hexadecimal
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## Como rodar o projeto localmente
 
-## Deployment
+### 1. Clone o repositório
 
-Your project is live at:
+```bash
+git clone <url-do-repositorio>
+cd image-to-hex-front
+```
 
-**[https://vercel.com/kaues-projects-dbdba449/v0-desktop-web-application](https://vercel.com/kaues-projects-dbdba449/v0-desktop-web-application)**
+### 2. Instale as dependências
 
-## Build your app
+Se estiver usando pnpm:
 
-Continue building your app on:
+```bash
+pnpm install
+```
 
-**[https://v0.dev/chat/projects/btgO7uCPZGk](https://v0.dev/chat/projects/btgO7uCPZGk)**
+Ou npm:
 
-## How It Works
+```bash
+npm install
+```
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+### 3. Configure as variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto e adicione:
+
+```
+API_URL=http://localhost:3333
+```
+
+Altere o valor conforme a URL do seu backend.
+
+### 4. Rode o projeto
+
+```bash
+pnpm dev
+```
+
+Ou:
+
+```bash
+npm run dev
+```
+
+O projeto estará disponível em [http://localhost:3000](http://localhost:3000)
+
+## Observações
+
+- Certifique-se de que o backend está rodando e acessível na URL definida em `API_URL`.
+- Para evitar problemas de CORS, recomenda-se utilizar as rotas internas do Next.js para proxy das requisições.
+
+---
+
+Desenvolvido por [Seu Nome].
+
