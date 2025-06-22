@@ -1,10 +1,14 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { useState } from "react"
-import { Upload, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from 'react'
+import { Upload, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  analyzeColorsService,
+  applyFilterService,
+} from './services/colorServices'
 
 interface ColorAnalysisResult {
   colors: string[]
@@ -14,15 +18,15 @@ export default function ColorAnalyzer() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [colors, setColors] = useState<string[]>([])
-  const [error, setError] = useState<string>("")
+  const [error, setError] = useState<string>('')
   const [dragActive, setDragActive] = useState(false)
 
   const handleFileSelect = (file: File) => {
-    if (file && file.type.startsWith("image/")) {
+    if (file && file.type.startsWith('image/')) {
       setSelectedFile(file)
-      setError("")
+      setError('')
     } else {
-      setError("Please select a valid image file")
+      setError('Please select a valid image file')
     }
   }
 
@@ -36,9 +40,9 @@ export default function ColorAnalyzer() {
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
+    if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true)
-    } else if (e.type === "dragleave") {
+    } else if (e.type === 'dragleave') {
       setDragActive(false)
     }
   }
@@ -58,28 +62,15 @@ export default function ColorAnalyzer() {
     if (!selectedFile) return
 
     setIsLoading(true)
-    setError("")
+    setError('')
     setColors([])
 
     try {
-      const formData = new FormData()
-      formData.append("file", selectedFile)
-
-      // Using analyze-colors endpoint
-      const response = await fetch("/api/analyze-colors", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to analyze colors")
-      }
-
-      const result: ColorAnalysisResult = await response.json()
+      const result = await analyzeColorsService(selectedFile)
       setColors(result.colors)
     } catch (err) {
-      setError("Failed to analyze image colors. Please try again.")
-      console.error("Error analyzing colors:", err)
+      setError('Falha ao analisar cores da imagem. Tenta novamente.')
+      console.error('Erro ao analisar cores:', err)
     } finally {
       setIsLoading(false)
     }
@@ -89,152 +80,177 @@ export default function ColorAnalyzer() {
     if (!selectedFile) return
 
     setIsLoading(true)
-    setError("")
+    setError('')
     setColors([])
 
     try {
-      const formData = new FormData()
-      formData.append("file", selectedFile)
-
-      // Using apply-filter endpoint
-      const response = await fetch("/api/apply-filter", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to apply filter")
-      }
-
-      const result: ColorAnalysisResult = await response.json()
+      const result = await applyFilterService(selectedFile)
       setColors(result.colors)
     } catch (err) {
-      setError("Failed to apply filter. Please try again.")
-      console.error("Error applying filter:", err)
+      setError('Falha ao aplicar filtro. Tenta novamente.')
+      console.error('Erro ao aplicar filtro:', err)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Color Analyzer</h1>
-          <p className="text-gray-600">Upload an image to analyze its colors or apply filters</p>
+    <div className='min-h-screen bg-gray-50 p-8'>
+      <div className='max-w-7xl mx-auto'>
+        <header className='mb-8'>
+          <h1 className='text-3xl font-bold text-gray-900 mb-2'>
+            Analisador de cores
+          </h1>
+          <p className='text-gray-600'>
+            Faça upload de uma imagem para analisar cores ou aplicar filtro{' '}
+          </p>
         </header>
 
-        <div className="grid grid-cols-2 gap-8 h-[calc(100vh-200px)]">
+        <div className='grid grid-cols-2 gap-8 h-[calc(100vh-200px)]'>
           {/* Left Section - Image Upload */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Upload Image</h2>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+            <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+              Enviar imagem
+            </h2>
 
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                dragActive ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:border-gray-400"
+                dragActive
+                  ? 'border-blue-400 bg-blue-50'
+                  : 'border-gray-300 hover:border-gray-400'
               }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
             >
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-lg font-medium text-gray-900 mb-2">Drop your image here, or click to browse</p>
-              <p className="text-sm text-gray-500 mb-4">Supports JPG, PNG, GIF up to 10MB</p>
+              <Upload className='mx-auto h-12 w-12 text-gray-400 mb-4' />
+              <p className='text-lg font-medium text-gray-900 mb-2'>
+                Arraste e solte a imagem aqui, ou clique para selecionar
+              </p>
+              <p className='text-sm text-gray-500 mb-4'>
+                Formatos suportados JPG e PNG até 10MB
+              </p>
 
               <input
-                type="file"
-                accept="image/*"
+                type='file'
+                accept='image/*'
                 onChange={handleFileChange}
-                className="hidden"
-                id="file-upload"
+                className='hidden'
+                id='file-upload'
                 disabled={isLoading}
               />
               <label
-                htmlFor="file-upload"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                htmlFor='file-upload'
+                className='inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
               >
-                Choose File
+                Escolher imagem
               </label>
             </div>
 
             {selectedFile && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm font-medium text-gray-900">Selected File:</p>
-                <p className="text-sm text-gray-600">{selectedFile.name}</p>
-                <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+              <div className='mt-4 p-4 bg-gray-50 rounded-lg'>
+                <p className='text-sm font-medium text-gray-900'>
+                  Imagem selecionada:
+                </p>
+                <p className='text-sm text-gray-600'>{selectedFile.name}</p>
+                <p className='text-xs text-gray-500'>
+                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                </p>
               </div>
             )}
 
             {error && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className='mt-4 p-3 bg-red-50 border border-red-200 rounded-md'>
+                <p className='text-sm text-red-600'>{error}</p>
               </div>
             )}
 
-            <div className="mt-6 flex gap-3">
-              <Button onClick={analyzeColors} disabled={!selectedFile || isLoading} className="flex-1">
+            <div className='mt-6 flex gap-3'>
+              <Button
+                onClick={analyzeColors}
+                disabled={!selectedFile || isLoading}
+                className='flex-1'
+              >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Processando...
                   </>
                 ) : (
-                  "Analyze Colors"
+                  'Analisar cores'
                 )}
               </Button>
 
-              <Button onClick={applyFilter} disabled={!selectedFile || isLoading} variant="outline" className="flex-1">
+              <Button
+                onClick={applyFilter}
+                disabled={!selectedFile || isLoading}
+                variant='outline'
+                className='flex-1'
+              >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Processando...
                   </>
                 ) : (
-                  "Apply Filter"
+                  'Aplicar filtro'
                 )}
               </Button>
             </div>
           </div>
 
           {/* Visual Divider */}
-          <div className="w-px bg-gray-200 absolute left-1/2 transform -translate-x-1/2 h-full"></div>
+          <div className='w-px bg-gray-200 absolute left-1/2 transform -translate-x-1/2 h-full'></div>
 
           {/* Right Section - Results Display */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Color Results</h2>
+          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+            <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+              Cores encontradas
+            </h2>
 
-            <div className="h-full">
+            <div className='h-full'>
               {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-500 mb-4" />
-                    <p className="text-gray-600">Analyzing image colors...</p>
+                <div className='flex items-center justify-center h-64'>
+                  <div className='text-center'>
+                    <Loader2 className='mx-auto h-8 w-8 animate-spin text-blue-500 mb-4' />
+                    <p className='text-gray-600'>
+                      Analisando cores da imagem...
+                    </p>
                   </div>
                 </div>
               ) : colors.length > 0 ? (
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-600">Found {colors.length} colors in your image:</p>
-                  <div className="grid grid-cols-6 gap-3">
+                <div className='space-y-4'>
+                  <p className='text-sm text-gray-600'>
+                    Encontrado {colors.length} cores nessa imagem:
+                  </p>
+                  <div className='grid grid-cols-6 gap-3'>
                     {colors.map((color, index) => (
-                      <div key={index} className="group">
+                      <div
+                        key={index}
+                        className='group'
+                      >
                         <div
-                          className="w-full aspect-square rounded-lg shadow-sm border border-gray-200 cursor-pointer transition-transform hover:scale-105"
+                          className='w-full aspect-square rounded-lg shadow-sm border border-gray-200 cursor-pointer transition-transform hover:scale-105'
                           style={{ backgroundColor: color }}
                           title={color}
                         />
-                        <p className="text-xs text-gray-600 text-center mt-1 font-mono">{color}</p>
+                        <p className='text-xs text-gray-600 text-center mt-1 font-mono'>
+                          {color}
+                        </p>
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                      <Upload className="h-8 w-8 text-gray-400" />
+                <div className='flex items-center justify-center h-64'>
+                  <div className='text-center'>
+                    <div className='w-16 h-16 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center'>
+                      <Upload className='h-8 w-8 text-gray-400' />
                     </div>
-                    <p className="text-gray-600">Upload an image to see color analysis results</p>
+                    <p className='text-gray-600'>
+                      Envie uma imagem para ver as cores encontradas
+                    </p>
                   </div>
                 </div>
               )}
@@ -245,3 +261,4 @@ export default function ColorAnalyzer() {
     </div>
   )
 }
+
