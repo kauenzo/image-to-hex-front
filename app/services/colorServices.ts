@@ -22,10 +22,12 @@ export async function analyzeColorsService(
 }
 
 export async function applyFilterService(
-  file: File
-): Promise<ColorAnalysisResult> {
+  file: File,
+  filterType: number
+): Promise<any> {
   const formData = new FormData()
   formData.append('file', file)
+  formData.append('filterType', filterType.toString())
 
   const response = await fetch(`${API_URL}/apply-filter`, {
     method: 'POST',

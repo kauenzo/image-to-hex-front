@@ -20,6 +20,7 @@ export default function ColorAnalyzer() {
   const [colors, setColors] = useState<string[]>([])
   const [error, setError] = useState<string>('')
   const [dragActive, setDragActive] = useState(false)
+  const [filteredImg, setFilteredImg] = useState<string | null>(null)
 
   const handleFileSelect = (file: File) => {
     if (file && file.type.startsWith('image/')) {
@@ -76,18 +77,23 @@ export default function ColorAnalyzer() {
     }
   }
 
-  const applyFilter = async () => {
+  const applyFilter = async (filterType: number) => {
     if (!selectedFile) return
 
     setIsLoading(true)
     setError('')
+    setFilteredImg(null)
     setColors([])
 
     try {
-      const result = await applyFilterService(selectedFile)
-      setColors(result.colors)
+      const result = await applyFilterService(selectedFile, filterType)
+      if (result.filtered) {
+        setFilteredImg(result.filtered)
+      } else {
+        setError('Resposta inesperada do servidor.')
+      }
     } catch (err) {
-      setError('Falha ao aplicar filtro. Tenta novamente.')
+      setError('Falha ao aplicar filtro. Tente novamente.')
       console.error('Erro ao aplicar filtro:', err)
     } finally {
       setIsLoading(false)
@@ -182,20 +188,30 @@ export default function ColorAnalyzer() {
                 )}
               </Button>
 
+              {/* Botões de filtro */}
               <Button
-                onClick={applyFilter}
+                onClick={() => applyFilter(0)}
                 disabled={!selectedFile || isLoading}
                 variant='outline'
                 className='flex-1'
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Processando...
-                  </>
-                ) : (
-                  'Aplicar filtro'
-                )}
+                Escala de Cinza
+              </Button>
+              <Button
+                onClick={() => applyFilter(1)}
+                disabled={!selectedFile || isLoading}
+                variant='outline'
+                className='flex-1'
+              >
+                Sépia
+              </Button>
+              <Button
+                onClick={() => applyFilter(2)}
+                disabled={!selectedFile || isLoading}
+                variant='outline'
+                className='flex-1'
+              >
+                Negativo
               </Button>
             </div>
           </div>
@@ -206,7 +222,7 @@ export default function ColorAnalyzer() {
           {/* Right Section - Results Display */}
           <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
             <h2 className='text-xl font-semibold text-gray-900 mb-4'>
-              Cores encontradas
+              {filteredImg ? 'Imagem filtrada' : 'Cores encontradas'}
             </h2>
 
             <div className='h-full'>
@@ -214,10 +230,19 @@ export default function ColorAnalyzer() {
                 <div className='flex items-center justify-center h-64'>
                   <div className='text-center'>
                     <Loader2 className='mx-auto h-8 w-8 animate-spin text-blue-500 mb-4' />
-                    <p className='text-gray-600'>
-                      Analisando cores da imagem...
-                    </p>
+                    <p className='text-gray-600'>Processando imagem...</p>
                   </div>
+                </div>
+              ) : filteredImg ? (
+                <div className='flex flex-col items-center justify-center h-64'>
+                  <img
+                    src={`data:image/png;base64,${filteredImg}`}
+                    alt='Imagem filtrada'
+                    className='max-h-60 rounded shadow border mb-4'
+                  />
+                  <p className='text-xs text-gray-600'>
+                    Pré-visualização do filtro aplicado
+                  </p>
                 </div>
               ) : colors.length > 0 ? (
                 <div className='space-y-4'>
