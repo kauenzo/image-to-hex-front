@@ -64,6 +64,7 @@ export default function ColorAnalyzer() {
 
     setIsLoading(true)
     setError('')
+    setFilteredImg(null)
     setColors([])
 
     try {
